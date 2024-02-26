@@ -1,7 +1,17 @@
 import filecmp
-import os.path
+import os
+import toolbox as t
 
-folder_to_ignore = ['folder1', 'folder2']
+global folders_to_ignore
+
+def init():
+    global folders_to_ignore
+    folders_to_ignore = []
+    list = t.read_file("compare_folders", "folder_to_ignore","conf")
+    folders = list.split(',')
+    for folder in folders:
+        folders_to_ignore.append(folder)
+    print(folders_to_ignore)
 
 def check_directory_exists(directory_path):
     """
@@ -83,8 +93,10 @@ def compare_directories_detailed(dir1, dir2, parent_path=""):
         new_dir2 = os.path.join(dir2, common_dir)
         compare_directories_detailed(new_dir1, new_dir2, os.path.join(parent_path, common_dir))
 
+t.init()
+init()
 # Example usage
-dir1_path = r"<path>\<to>\<folder>\<one>"
-dir2_path = r"<path>\<to>\<folder>\<two>"
+dir1_path = t.read_file("compare_folders", "dir1", "conf")
+dir2_path = t.read_file("compare_folders", "dir2", "conf")
 
 compare_directories_detailed(dir1_path, dir2_path)
