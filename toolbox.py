@@ -17,11 +17,11 @@ def read_file(name, selector, type):
     elif type == "conf":
         file_path = os.path.join(CONF_PATH, name + ".txt")
     else:
-        print("type is badly set, can only get value 'out' or 'conf'")
+        print(f"Got type = {type} and should either be 'out' or 'conf'")
         return
 
     if os.path.isfile(file_path):  
-        print ("file is valid")  
+        print(f"{file_path} is valid")  
         # Initialize an empty list to store the relevant lines
         lines = []        
         
@@ -30,8 +30,8 @@ def read_file(name, selector, type):
             for line in input_file:
                 if line.strip().startswith(selector):
                     if type == "conf":
-                        ret = line.split("=")[1]
-                        return ret.rstrip('\n')
+                        ret = line.split("{")[1]
+                        return ret.rstrip('\n').rstrip('}')
                     else :   
                         lines.append(line)                    
         return lines

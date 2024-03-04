@@ -61,9 +61,33 @@ def run_cmd3():
         for line in lines:
             run_cmd(line)
 
+def open_app():
+    # Name
+    app_name = t.read_file("cmd_test", "open_app", "conf")
+    # Path
+    selector_path = app_name.replace(" ","_") + "_path"
+    app_path = t.read_file("cmd_test", selector_path, "conf")
+    # Args
+    args = []
+    selector_args = app_name.replace(" ","_") + "_args"
+    string_args = t.read_file("cmd_test", selector_args, "conf").split(" ")
+    for arg in string_args:
+        args.append(arg)
+    try:
+        # You can add any command-line arguments you need (e.g., /M for macro file)
+        command_args = [app_path, *args]
+
+        # Launch App
+        subprocess.Popen(command_args, shell=True)
+
+        print(f"{app_name} opened successfully!")
+    except Exception as e:
+        print(f"Error opening {app_name}: {e}")
+
 
 if __name__ == "__main__":
     t.init()
     run_cmd1()
     if not run_cmd2():
         run_cmd3()
+    open_app()
