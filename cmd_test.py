@@ -1,5 +1,7 @@
 import subprocess
 import os
+import time
+import sys
 import toolbox as t
 
 def run_cmd(cmd, name=None, directory=None, save_error=None):
@@ -18,8 +20,7 @@ def run_cmd(cmd, name=None, directory=None, save_error=None):
         # Save the output to a file
         if name and result.stdout:
             filename = name + "_out.txt"
-            t.save_file(result.stdout, filename)
-        
+            t.save_file(result.stdout, filename)        
         return 1
 
     except subprocess.CalledProcessError as e:
@@ -29,6 +30,36 @@ def run_cmd(cmd, name=None, directory=None, save_error=None):
             filename = os.path.join(name + "_out.txt")
             t.save_file(e.stderr, filename)
         return 0
+
+def create_command(app, ret_type=None):
+    # Name
+    app_name = t.read_file("cmd_test", app, "conf")
+    # Path
+    selector_path = app_name.replace(" ","_") + "_path"
+    app_path = t.read_file("cmd_test", selector_path, "conf")
+    app_exe = os.path.basename(app_path)
+    # Args
+    args = []
+    selector_args = app_name.replace(" ","_") + "_args"
+    string_args = t.read_file("cmd_test", selector_args, "conf").split(" ")
+    for arg in string_args:
+        args.append(arg)
+
+    if ret_type == "cmd":
+        return [app_path, *args]
+    else:
+        return [app_path, *args], app_exe, app_name
+
+def open_app(app):
+    command, app_exe, app_name = create_command(app)
+    try:        
+        # Launch App
+        process = subprocess.Popen(command, shell=True)
+        print(f"{app_name} opened successfully!")
+    except Exception as e:
+        print(f"Error opening {app_name}: {e}")
+        process = None
+    return process, app_exe
 
 
 def run_cmd1():
@@ -61,33 +92,41 @@ def run_cmd3():
         for line in lines:
             run_cmd(line)
 
-def open_app():
-    # Name
-    app_name = t.read_file("cmd_test", "open_app", "conf")
-    # Path
-    selector_path = app_name.replace(" ","_") + "_path"
-    app_path = t.read_file("cmd_test", selector_path, "conf")
-    # Args
-    args = []
-    selector_args = app_name.replace(" ","_") + "_args"
-    string_args = t.read_file("cmd_test", selector_args, "conf").split(" ")
-    for arg in string_args:
-        args.append(arg)
-    try:
-        # You can add any command-line arguments you need (e.g., /M for macro file)
-        command_args = [app_path, *args]
+def open_app1():
+    # Opens app_1
+    process_1, app_exe_1 = open_app("app_1")
+    print(process_1)
+    time.sleep(10)
+    subprocess.Popen(["taskkill", "/F", "/IM", app_exe_1])
+    time.sleep(10)
+    process_1, app_exe_1 = open_app("app_1")
+    time.sleep(10)
+    subprocess.Popen(["taskkill", "/F", "/IM", app_exe_1])
 
-        # Launch App
-        subprocess.Popen(command_args, shell=True)
+def open_app2():
+    command = create_command("app_1", ret_type="cmd")
+    print(command)
+    # Start the process
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    # Read and display the output in real time
+    while True:
+        stdout_line = process.stdout.readline()
+        stderr_line = process.stderr.readline()
 
-        print(f"{app_name} opened successfully!")
-    except Exception as e:
-        print(f"Error opening {app_name}: {e}")
+        if stdout_line:
+            sys.stdout.write(stdout_line)
+        if stderr_line:
+            sys.stderr.write(stderr_line)
+
+        # Check if the process has completed
+        if process.poll() is not None:
+            break
 
 
 if __name__ == "__main__":
     t.init()
-    run_cmd1()
-    if not run_cmd2():
-        run_cmd3()
-    open_app()
+    # run_cmd1()
+    # if not run_cmd2():
+    #     run_cmd3()
+    # open_app1()
+    open_app2()
