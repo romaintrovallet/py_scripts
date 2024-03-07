@@ -6,6 +6,7 @@ import toolbox as t
 
 def run_cmd(cmd, name=None, directory=None, save_error=None):
     list = cmd.split()
+    print(list)
     try:
         # Execute the command
         if directory:
@@ -13,14 +14,21 @@ def run_cmd(cmd, name=None, directory=None, save_error=None):
         else:
             result = subprocess.run(list, capture_output=True, text=True, check=True)
 
-        # Print the output to the console
-        print("Command output:")
-        print(result.stdout)
-
-        # Save the output to a file
-        if name and result.stdout:
-            filename = name + "_out.txt"
-            t.save_file(result.stdout, filename)        
+        if result.stdout:        
+            # Print the output to the console
+            print("Command output:")
+            print(result.stdout)
+            # Save the output to a file
+            if name:
+                filename = name + "_out.txt"
+                t.save_file(result.stdout, filename)
+        if result.stderr:
+            # Print the output to the console
+            print("Command error:")
+            print(result.stderr)
+            if save_error and name:
+                filename = name + "_out.txt"
+                t.save_file(result.stderr, filename)
         return 1
 
     except subprocess.CalledProcessError as e:
@@ -68,13 +76,19 @@ def run_cmd1():
 
     run_cmd(cmd, name=name)
 
+def run_cmd4():
+    cmd = t.read_file("cmd_test", "cmd_4", "conf")
+    name = cmd.split()[0]
+
+    run_cmd(cmd, name=name, save_error=True)
+
 def run_cmd2():
     cmd = t.read_file("cmd_test", "cmd_2", "conf")
     name = cmd.replace(" ","_")
     search = cmd.split()[0]
 
     directory = t.read_file("cmd_test", search +"_path","conf")
-    if os.path.isdir(directory):  
+    if os.path.isdir(directory):
         print ("directory is valid")
         return run_cmd(cmd, name=name, directory=directory, save_error=True)
     else:
@@ -87,7 +101,7 @@ def run_cmd3():
     search = t.read_file("cmd_test", "cmd_3", "conf")
 
     file = name + "_out"
-    lines = t.read_file(file, search, "out")      
+    lines = t.read_file(file, search, "out")
     if lines :    
         for line in lines:
             run_cmd(line)
@@ -128,5 +142,6 @@ if __name__ == "__main__":
     # run_cmd1()
     # if not run_cmd2():
     #     run_cmd3()
+    run_cmd4()
     # open_app1()
-    open_app2()
+    # open_app2()
