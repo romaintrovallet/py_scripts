@@ -5,11 +5,21 @@ global CUR_PATH
 global OUT_PATH
 global CONF_PATH
 
-def init():
+def init(uproot=0):
     global CUR_PATH, OUT_PATH, CONF_PATH
     CUR_PATH = os.getcwd()
-    OUT_PATH = os.path.join(CUR_PATH, "py_scripts\git-free\out")
-    CONF_PATH = os.path.join(CUR_PATH, "py_scripts\git-free\config")
+    if uproot:
+        for _ in range(uproot):
+            CUR_PATH = os.path.dirname(CUR_PATH)
+    git_path = os.path.join(CUR_PATH, "py_scripts")
+    if os.path.isdir(git_path):
+        OUT_PATH = os.path.join(git_path, "git-free\out")
+        CONF_PATH = os.path.join(git_path, "git-free\config")
+        return True
+    else:
+        print(f"Path given is not valid : {git_path}")
+        print("Git is badly setup or use uproot")
+        return False
 
 
 def get_file(name, type, ext):
