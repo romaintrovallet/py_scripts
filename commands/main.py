@@ -20,8 +20,10 @@ def execute_json_command(infos):
         os.chdir(path)
         os.system(f'start cmd /k ; {cmd}')
     else:
-        print(f"Could not open console as {path} is not a real dir")
-        print(f"Or security_flag was false : {security_flag}")
+        if not os.path.isdir(path):
+            print(f"\n Error : Could not open console as {path} is not a real dir\n")
+        if not security_flag:
+            print(f"\n Error : Security did not pass : security_flag={security_flag}\n")
 
 def retrieve_json_infos(letter):
     infos = []
